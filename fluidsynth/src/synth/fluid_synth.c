@@ -742,7 +742,7 @@ new_fluid_synth(fluid_settings_t *settings)
   {
     int prio_level = 0;
     fluid_settings_getint (synth->settings, "audio.realtime-prio", &prio_level);
-    fluid_synth_update_mixer(synth, fluid_rvoice_mixer_set_threads, 
+    fluid_synth_update_mixer(synth, fluid_rvoice_mixer_set_threads,
 			     synth->cores-1, prio_level);
   }
 
@@ -3098,7 +3098,7 @@ fluid_synth_start_voice(fluid_synth_t* synth, fluid_voice_t* voice)
 void
 fluid_synth_add_sfloader(fluid_synth_t* synth, fluid_sfloader_t* loader)
 {
-  gboolean sfont_already_loaded;
+  bool sfont_already_loaded;
 
   fluid_return_if_fail (synth != NULL);
   fluid_return_if_fail (loader != NULL);

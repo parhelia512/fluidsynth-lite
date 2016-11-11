@@ -85,19 +85,4 @@ int fluid_cmd_handler_handle(fluid_cmd_handler_t* handler,
 			    int ac, char** av,
 			    fluid_ostream_t out);
 
-
-
-void fluid_server_remove_client(fluid_server_t* server, fluid_client_t* client);
-void fluid_server_add_client(fluid_server_t* server, fluid_client_t* client);
-
-
-fluid_client_t* new_fluid_client(fluid_server_t* server,
-			       fluid_settings_t* settings,
-			       fluid_cmd_handler_t* handler,
-			       fluid_socket_t sock);
-
-void delete_fluid_client(fluid_client_t* client);
-void fluid_client_quit(fluid_client_t* client);
-
-
 #endif /* _FLUID_CMD_H */

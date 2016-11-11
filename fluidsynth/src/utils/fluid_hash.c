@@ -53,7 +53,7 @@ typedef struct
 
 /* Excerpt from glib gprimes.c */
 
-static const guint primes[] =
+static const uint32 primes[] =
 {
   11,
   19,
@@ -432,7 +432,7 @@ fluid_hashtable_iter_init (fluid_hashtable_iter_t *iter,
   ri->prev_node = NULL;
   ri->node = NULL;
   ri->position = -1;
-  ri->pre_advanced = FALSE;
+  ri->pre_advanced = false;
 }
 
 /**
@@ -455,11 +455,11 @@ fluid_hashtable_iter_next (fluid_hashtable_iter_t *iter, void **key,
 {
   RealIter *ri = (RealIter *) iter;
 
-  fluid_return_val_if_fail (iter != NULL, FALSE);
+  fluid_return_val_if_fail (iter != NULL, false);
 
   if (ri->pre_advanced)
     {
-      ri->pre_advanced = FALSE;
+      ri->pre_advanced = false;
 
       if (ri->node == NULL)
 	return FALSE;
@@ -618,7 +618,7 @@ fluid_hashtable_ref (fluid_hashtable_t *hashtable)
   fluid_return_val_if_fail (hashtable != NULL, NULL);
   fluid_return_val_if_fail (hashtable->ref_count > 0, hashtable);
 
-  fluid_atomic_int_add (&hashtable->ref_count, 1);
+  hashtable->ref_count++;
   return hashtable;
 }
 
@@ -639,7 +639,7 @@ fluid_hashtable_unref (fluid_hashtable_t *hashtable)
   fluid_return_if_fail (hashtable != NULL);
   fluid_return_if_fail (hashtable->ref_count > 0);
 
-  if (fluid_atomic_int_exchange_and_add (&hashtable->ref_count, -1) - 1 == 0)
+  if (atomic_fetch_add(&hashtable->ref_count, -1) - 1 == 0)
     {
       fluid_hashtable_remove_all_nodes (hashtable, TRUE);
       FLUID_FREE (hashtable->nodes);
@@ -1270,7 +1270,7 @@ fluid_direct_equal (const void *v1, const void *v2)
 unsigned int
 fluid_direct_hash (const void *v)
 {
-  return FLUID_POINTER_TO_UINT (v);
+  return FLUID_POINTER_TO_UINT(v);
 }
 
 /**
