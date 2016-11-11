@@ -22,7 +22,6 @@
 include_directories (
     ${CMAKE_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/src
-    ${CMAKE_SOURCE_DIR}/src/bindings
     ${CMAKE_SOURCE_DIR}/src/synth
     ${CMAKE_SOURCE_DIR}/src/rvoice
     ${CMAKE_SOURCE_DIR}/src/midi
@@ -125,34 +124,11 @@ set ( public_main_HEADER
     ${CMAKE_SOURCE_DIR}/include/fluidsynth.h
 )
 
-link_directories (
-    ${GLIB_LIBDIR}
-    ${GLIB_LIBRARY_DIRS}
-    ${LASH_LIBDIR}
-    ${LASH_LIBRARY_DIRS}
-    ${LADCCA_LIBDIR}
-    ${LADCCA_LIBRARY_DIRS}
-    ${JACK_LIBDIR}
-    ${JACK_LIBRARY_DIRS}
-    ${ALSA_LIBDIR}
-    ${ALSA_LIBRARY_DIRS}
-    ${PULSE_LIBDIR}
-    ${PULSE_LIBRARY_DIRS}
-    ${PORTAUDIO_LIBDIR}
-    ${PORTAUDIO_LIBRARY_DIRS}
-    ${LIBSNDFILE_LIBDIR}
-    ${LIBSNDFILE_LIBRARY_DIRS}
-    ${DBUS_LIBDIR}
-    ${DBUS_LIBRARY_DIRS}
-)
-
-
 # note: by default this target creates a shared object (or dll). To build a
 # static library instead, set the option BUILD_SHARED_LIBS to FALSE.
 add_library ( libfluidsynth
     ${config_SOURCES}
     ${fluid_windows_SOURCES}
-    ${fluid_ladspa_SOURCES}
     ${libfluidsynth_SOURCES}
     ${public_HEADERS}
     ${public_main_HEADER}

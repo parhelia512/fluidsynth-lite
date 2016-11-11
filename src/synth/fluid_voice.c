@@ -1572,7 +1572,7 @@ fluid_voice_optimize_sample(fluid_sample_t* s)
 fluid_real_t 
 fluid_voice_get_overflow_prio(fluid_voice_t* voice, 
 			       fluid_overflow_prio_t* score,
-			       unsigned int cur_time)
+                              unsigned int cur_time)
 {
   fluid_real_t this_voice_prio = 0;
 
