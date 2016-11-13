@@ -126,7 +126,7 @@ struct _fluid_synth_t
   int device_id;                     /**< Device ID used for SYSEX messages */
   int polyphony;                     /**< Maximum polyphony */
   int with_reverb;                   /**< Should the synth use the built-in reverb unit? */
-  int with_chorus;                   /**< Should the synth use the built-in chorus unit? */
+  atomic_int with_chorus;            /**< Should the synth use the built-in chorus unit? */
   int verbose;                       /**< Turn verbose mode on? */
   int dump;                          /**< Dump events to stdout to hook up a user interface? */
   double sample_rate;                /**< The sample rate */
@@ -160,11 +160,11 @@ struct _fluid_synth_t
   float reverb_width;                /**< Shadow of reverb width */
   float reverb_level;                /**< Shadow of reverb level */
 
-  int chorus_nr;                     /**< Shadow of chorus number */
-  float chorus_level;                /**< Shadow of chorus level */
-  float chorus_speed;                /**< Shadow of chorus speed */
-  float chorus_depth;                /**< Shadow of chorus depth */
-  int chorus_type;                   /**< Shadow of chorus type */
+  atomic_int chorus_nr;                     /**< Shadow of chorus number */
+  atomic_float chorus_level;                /**< Shadow of chorus level */
+  atomic_float chorus_speed;                /**< Shadow of chorus speed */
+  atomic_float chorus_depth;                /**< Shadow of chorus depth */
+  atomic_int chorus_type;            /**< Shadow of chorus type */
 
   int cur;                           /**< the current sample in the audio buffers to be output */
   int curmax;                        /**< current amount of samples present in the audio buffers */
@@ -173,7 +173,13 @@ struct _fluid_synth_t
   char outbuf[256];                  /**< buffer for message output */
   float cpu_load;                    /**< CPU load in percent (CPU time required / audio synthesized time * 100) */
 
-  fluid_tuning_t*** tuning;          /**< 128 banks of 128 programs for the tunings */
+  fluid_tuning_t*** tuning;          
+
+
+
+
+
+/**< 128 banks of 128 programs for the tunings */
   fluid_private_t tuning_iter;       /**< Tuning iterators per each thread */
 
   fluid_midi_router_t* midi_router;  /**< The midi router. Could be done nicer. */

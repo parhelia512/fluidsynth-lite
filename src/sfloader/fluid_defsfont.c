@@ -238,7 +238,11 @@ typedef struct _fluid_cached_sampledata_t {
 } fluid_cached_sampledata_t;
 
 static fluid_cached_sampledata_t* all_cached_sampledata = NULL;
+#ifdef FLUID_MUTEX_INIT
 static fluid_mutex_t cached_sampledata_mutex = FLUID_MUTEX_INIT;
+#else
+static fluid_mutex_t cached_sampledata_mutex;
+#endif
 
 static int fluid_get_file_modification_time(char *filename, time_t *modification_time)
 {

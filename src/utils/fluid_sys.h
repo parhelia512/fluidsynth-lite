@@ -58,10 +58,10 @@ void fluid_time_config(void);
 #define fluid_return_val_if_fail(expr, val) if (!(expr)) return (val)
 #define fluid_return_if_fail(expr)          if (!(expr)) return
 #define FLUID_INLINE                        inline
-#define FLUID_POINTER_TO_UINT(x)            ((void *)(x))
-#define FLUID_UINT_TO_POINTER(X)            ((uintptr_t)(x))
-#define FLUID_POINTER_TO_INT(x)             ((void *)(x))
-#define FLUID_INT_TO_POINTER(x)             ((intptr_t)(x))
+#define FLUID_POINTER_TO_UINT(x)            ((uint32_t)(x))
+#define FLUID_UINT_TO_POINTER(X)            ((void *)(x))
+#define FLUID_POINTER_TO_INT(x)             ((int)(x))
+#define FLUID_INT_TO_POINTER(x)             ((void *)(x))
 #define FLUID_N_ELEMENTS(struct)            (sizeof (struct) / sizeof (struct[0]))
 
 // TODO: Add proper big endianess check
@@ -126,7 +126,7 @@ int fluid_timer_stop(fluid_timer_t* timer);
 
 /* Muteces */
 
-#if HAVE_PTHREAD_H
+#if HAVE_PTHREAD_H && !defined(_WIN32)
 
 static FLUID_INLINE void
 fluid_pthread_mutex_init(pthread_mutex_t *m, int kind)
@@ -221,11 +221,104 @@ fluid_thread_t* new_fluid_thread(const char *name, fluid_thread_func_t func, voi
 void delete_fluid_thread(fluid_thread_t* thread);
 void fluid_thread_self_set_prio (int prio_level);
 int fluid_thread_join(fluid_thread_t* thread);
+
+#else
+
+static FLUID_INLINE void
+fluid_win32_mutex_init(PHANDLE m)
+{
+    *m = CreateMutex(NULL, TRUE, NULL);
+}
+
+/* Regular mutex */
+typedef CRITICAL_SECTION fluid_mutex_t;
+#define fluid_mutex_init(_m)      InitializeCriticalSection(&(_m))
+#define fluid_mutex_destroy(_m)   DeleteCriticalSection(&(_m))
+#define fluid_mutex_lock(_m)      EnterCriticalSection(&(_m))
+#define fluid_mutex_unlock(_m)    LeaveCriticalSection(&(_m))
+
+/* Recursive lock capable mutex */
+typedef HANDLE fluid_rec_mutex_t;
+#define fluid_rec_mutex_init(_m)      fluid_win32_mutex_init(&(_m))
+#define fluid_rec_mutex_destroy(_m)   CloseHandle(_m)
+#define fluid_rec_mutex_lock(_m)      WaitForSingleObject(_m, INFINITE)
+#define fluid_rec_mutex_unlock(_m)    ReleaseMutex(_m)
+
+/* Dynamically allocated mutex suitable for fluid_cond_t use */
+typedef HANDLE fluid_cond_mutex_t;
+#define fluid_cond_mutex_init(m)      fluid_win32_mutex_init(m)
+#define fluid_cond_mutex_destroy(m)   CloseHandle(*(m))
+#define fluid_cond_mutex_lock(m)      WaitForSingleObject(*(m), INFINITE)
+#define fluid_cond_mutex_unlock(m)    ReleaseMutex(*(m))
+
+static FLUID_INLINE fluid_cond_mutex_t *
+new_fluid_cond_mutex (void)
+{
+  fluid_cond_mutex_t *mutex;
+  mutex = malloc(sizeof(fluid_cond_mutex_t));
+  fluid_cond_mutex_init(mutex);
+  return mutex;
+}
+
+static FLUID_INLINE void
+delete_fluid_cond_mutex (fluid_cond_mutex_t *m)
+{
+  fluid_cond_mutex_destroy(m);
+  free(m);
+}
+
+/* Thread condition signaling */
+typedef CONDITION_VARIABLE fluid_cond_t;
+#define fluid_cond_init(cond)           InitializeConditionVariable(cond)
+#define fluid_cond_destroy(cond)
+#define fluid_cond_signal(cond)         WakeConditionVariable(cond)
+#define fluid_cond_broadcast(cond)      WakeAllConditionVariable(cond)
+#define fluid_cond_wait(cond, mutex)    SleepConditionVariableCS(cond, mutex, INFINITE)
+
+static FLUID_INLINE fluid_cond_t *
+new_fluid_cond (void)
+{
+  fluid_cond_t *cond;
+  cond = malloc(sizeof(fluid_cond_t));
+  fluid_cond_init(cond);
+  return cond;
+}
+
+static FLUID_INLINE void
+delete_fluid_cond (fluid_cond_t *cond)
+{
+  fluid_cond_destroy(cond);
+  free(cond);
+}
+
+/* Thread private data */
+
+typedef DWORD fluid_private_t;
+#define fluid_private_init(_priv)                  (_priv = TlsAlloc())
+#define fluid_private_free(_priv)                  TlsFree(_priv);
+#define fluid_private_get(_priv)                   TlsGetValue(_priv)
+#define fluid_private_set(_priv, _data)            TlsSetValue(_priv, _data)
+
+/* Threads */
+
+typedef HANDLE fluid_thread_t;
+typedef void *(*fluid_thread_func_t)(void* data);
+
+#define FLUID_THREAD_ID_NULL            0                      /* A NULL "ID" value */
+#define fluid_thread_id_t               DWORD                  /* Data type for a thread ID */
+#define fluid_thread_get_id()           GetCurrentThreadId()   /* Get unique "ID" for current thread */
+
+fluid_thread_t* new_fluid_thread(const char *name, fluid_thread_func_t func, void *data,
+                                 int prio_level, int detach);
+void delete_fluid_thread(fluid_thread_t* thread);
+void fluid_thread_self_set_prio (int prio_level);
+int fluid_thread_join(fluid_thread_t* thread);
+
 #endif /* HAVE_PTHREAD_H */
 
 /* Atomic operations */
 
-#if HAVE_STDATOMIC_H
+#if HAVE_STDATOMIC_H && !defined(_WIN32)
 
 #define fluid_atomic_int_inc(_pi) atomic_fetch_add(_pi, 1)
 #define fluid_atomic_int_add(_pi, _val) atomic_fetch_add(_pi, _val)
@@ -245,6 +338,41 @@ int fluid_thread_join(fluid_thread_t* thread);
 
 #define fluid_atomic_float_get(_pf) atomic_load(_pf)
 #define fluid_atomic_float_set(_pf, _val) atomic_store(_pf, _val)
+
+#elif _WIN32
+
+typedef volatile LONG atomic_int;
+typedef volatile float atomic_float;
+
+#define fluid_atomic_int_inc(_pi) InterlockedIncrement(_pi)
+#define fluid_atomic_int_add(_pi, _val) InterlockedAdd(_pi, _val)
+#define fluid_atomic_int_get(_pi) (*_pi)
+#define fluid_atomic_int_set(_pi, _val) InterlockedExchange(_pi, _val)
+#define fluid_atomic_int_compare_and_exchange(_pi, _old, _new)  \
+    InterlockedCompareExchange(_pi, _old, _new)
+#define fluid_atomic_int_exchange_and_add(_pi, _add)  \
+    InterlockedExchangeAdd(_pi, _add)
+
+#define fluid_atomic_pointer_get(_pp)           (_pp)
+#define fluid_atomic_pointer_set(_pp, val)      InterlockedExchangePointer(&( _pp ), val)
+#define fluid_atomic_pointer_compare_and_exchange(_pp, _old, _new)  \
+    InterlockedCompareExchangePointer(&(_pp), _old, _new)
+
+static FLUID_INLINE void
+fluid_win32_atomic_float_set(atomic_float *pf, float val)
+{
+    union {
+        float fv;
+        LONG iv;
+    } un;
+    volatile LONG *pi = (volatile LONG *) pf;
+
+    un.fv = val;
+    InterlockedExchange(pi, un.iv);
+}
+
+#define fluid_atomic_float_get(_pf) (*(_pf));
+#define fluid_atomic_float_set(_pf, _val) fluid_win32_atomic_float_set(_pf, _val)
 
 #endif /* HAVE_STDATOMIC_H */
 

@@ -45,7 +45,7 @@ struct _fluid_mixer_buffers_t {
   fluid_rvoice_t** finished_voices; /* List of voices who have finished */
   int finished_voice_count;
 
-  int ready;             /**< Atomic: buffers are ready for mixing */
+  atomic_int ready;             /**< Atomic: buffers are ready for mixing */
 
   int buf_blocks;             /**< Number of blocks allocated in the buffers */
 

@@ -102,6 +102,11 @@
 #include <limits.h>
 #endif
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
+
 /* MinGW32 special defines */
 #ifdef MINGW32
 
@@ -137,14 +142,6 @@ typedef float fluid_real_t;
 typedef double fluid_real_t;
 #endif
 
-
-#if defined(WIN32)
-typedef SOCKET fluid_socket_t;
-#else
-typedef int fluid_socket_t;
-#define INVALID_SOCKET -1
-#endif
-
 #if defined(SUPPORTS_VLA)
 #  define FLUID_DECLARE_VLA(_type, _name, _len) \
      _type _name[_len]
@@ -165,8 +162,10 @@ typedef uint32_t            uint32;
 //typedef guint64            uint64;
 
 /** Boolean types  */
+#ifndef _WIN32
 #define TRUE true
 #define FALSE false
+#endif
 
 /***************************************************************
  *

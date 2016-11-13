@@ -79,20 +79,24 @@ check_include_file ( stdlib.h HAVE_STDLIB_H )
 check_include_file ( stdio.h HAVE_STDIO_H )
 check_include_file ( stdint.h HAVE_STDINT_H )
 check_include_file ( stdbool.h HAVE_STDBOOL_H )
-check_include_file ( stdatomic.h HAVE_STDATOMIC_H )
 check_include_file ( threads.h HAVE_THREADS_H )
 check_include_file ( math.h HAVE_MATH_H )
 check_include_file ( errno.h HAVE_ERRNO_H )
 check_include_file ( stdarg.h HAVE_STDARG_H )
 check_include_file ( unistd.h HAVE_UNISTD_H )
 check_include_file ( memory.h HAVE_MEMORY_H )
-check_include_file ( pthread.h HAVE_PTHREAD_H )
 check_include_file ( sys/mman.h HAVE_SYS_MMAN_H )
 check_include_file ( sys/types.h HAVE_SYS_TYPES_H )
 check_include_file ( sys/time.h HAVE_SYS_TIME_H )
 check_include_file ( sys/stat.h HAVE_SYS_STAT_H )
 check_include_file ( sys/ioctl.h HAVE_SYS_IOCTL_H )
 check_include_file ( fcntl.h HAVE_FCNTL_H )
+
+if ( NOT WIN32 )
+  check_include_file ( stdatomic.h HAVE_STDATOMIC_H )
+  check_include_file ( pthread.h HAVE_PTHREAD_H )
+endif ()
+
 include ( TestInline )
 include ( TestVLA )
 include ( TestBigEndian )
@@ -136,6 +140,7 @@ if ( WIN32 )
   if ( MINGW )
     set ( MINGW32 1 )
     add_definitions ( -mms-bitfields )
+    add_definitions ( -D_WIN32_WINNT=0x600 )
   endif  ( MINGW )
 else ( WIN32 )
 # Check PThreads, but not in Windows
@@ -247,14 +252,6 @@ if ( CMAKE_BUILD_TYPE MATCHES "Debug" )
     set ( ENABLE_DEBUG 1 )
     set ( DEBUG 1 )
 endif ( CMAKE_BUILD_TYPE MATCHES "Debug" )
-
-# Mandatory tool: pkg-config
-find_package ( PkgConfig REQUIRED )
-
-# Mandatory libraries: glib and gthread
-pkg_check_modules ( GLIB REQUIRED glib-2.0>=2.6.5 gthread-2.0>=2.6.5 )
-
-include ( UnsetPkgConfig )
 
 # General configuration file
 configure_file ( ${CMAKE_SOURCE_DIR}/src/config.cmake

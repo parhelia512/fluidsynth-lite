@@ -116,10 +116,14 @@ fluid_tuning_unref (fluid_tuning_t *tuning, int count)
   /* Add and compare are separate, but that is OK, since refcount will only
    * reach 0 when there are no references and therefore no possibility of
    * another thread adding a reference in between */
-  fluid_atomic_int_add (&tuning->refcount, -count);
+
+  // TODO: Make this properly atomic
+  //fluid_atomic_int_add (&tuning->refcount, -count);
+  tuning->refcount -= count;
 
   /* Delete when refcount reaches 0 */
-  if (!fluid_atomic_int_get (&tuning->refcount))
+  //if (!fluid_atomic_int_get (&tuning->refcount))
+  if (!tuning->refcount)
   {
     delete_fluid_tuning (tuning);
     return TRUE;

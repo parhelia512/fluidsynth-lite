@@ -585,12 +585,12 @@ fluid_thread_high_prio (void *data)
 fluid_thread_t *
 new_fluid_thread (const char *name, fluid_thread_func_t func, void *data, int prio_level, int detach)
 {
-  pthread_t *thread;
+  fluid_thread_t *thread;
   fluid_thread_info_t *info;
 
   fluid_return_val_if_fail (func != NULL, NULL);
 
-  thread = FLUID_NEW(pthread_t);
+  thread = FLUID_NEW(fluid_thread_t);
   if (prio_level > 0)
   {
     info = FLUID_NEW (fluid_thread_info_t);
@@ -604,9 +604,15 @@ new_fluid_thread (const char *name, fluid_thread_func_t func, void *data, int pr
     info->func = func;
     info->data = data;
     info->prio_level = prio_level;
-    pthread_create(thread, NULL, fluid_thread_high_prio, info);
+    data = info;
+    func = fluid_thread_high_prio;
   }
-  else pthread_create(thread, NULL, func, data);
+
+#if _WIN32
+  *thread = CreateThread(NULL, 0, func, data, 0, NULL);
+#else
+  pthread_create(thread, NULL, func, data);
+#endif
 
   if (!thread)
   {
@@ -614,9 +620,14 @@ new_fluid_thread (const char *name, fluid_thread_func_t func, void *data, int pr
     return NULL;
   }
 
-// #if NEW_GLIB_THREAD_API
-//   if (detach) g_thread_unref (thread);  // Release thread reference, if caller wants to detach
-// #endif
+  if (detach)
+  {
+#if _WIN32
+    CloseHandle(*thread);
+#else
+    pthread_detach(*thread);
+#endif
+  }
 
   return thread;
 }
@@ -639,7 +650,12 @@ delete_fluid_thread(fluid_thread_t* thread)
 int
 fluid_thread_join(fluid_thread_t* thread)
 {
+#ifdef _WIN32
+  WaitForSingleObject(*thread, INFINITE);
+  CloseHandle(*thread);
+#else
   pthread_join(*thread, NULL);
+#endif
 
   return FLUID_OK;
 }
@@ -705,7 +721,7 @@ new_fluid_timer (int msec, fluid_timer_callback_t callback, void* data,
   if (new_thread)
   {
     timer->thread = new_fluid_thread ("timer", fluid_timer_run, timer, high_priority
-                                      ? FLUID_SYS_TIMER_HIGH_PRIO_LEVEL : 0, FALSE);
+                                      ? FLUID_SYS_TIMER_HIGH_PRIO_LEVEL : 0, false);
     if (!timer->thread)
     {
       FLUID_FREE (timer);
@@ -824,22 +840,8 @@ fluid_istream_gets (fluid_istream_t in, char* buf, int len)
 
   while (--len > 0)
   {
-#ifndef WIN32
     n = read(in, &c, 1);
     if (n == -1) return -1;
-#else
-    /* Handle read differently depending on if its a socket or file descriptor */
-    if (!(in & WIN32_SOCKET_FLAG))
-    {
-      n = read(in, &c, 1);
-      if (n == -1) return -1;
-    }
-    else
-    {
-      n = recv(in & ~WIN32_SOCKET_FLAG, &c, 1, 0);
-      if (n == SOCKET_ERROR) return -1;
-    }
-#endif
 
     if (n == 0)
     {
@@ -891,20 +893,5 @@ fluid_ostream_printf (fluid_ostream_t out, char* format, ...)
 
   buf[4095] = 0;
 
-#ifndef WIN32
   return write (out, buf, strlen (buf));
-#else
-  {
-    int retval;
-
-    /* Handle write differently depending on if its a socket or file descriptor */
-    if (!(out & WIN32_SOCKET_FLAG))
-      return write(out, buf, strlen (buf));
-
-    /* Socket */
-    retval = send (out & ~WIN32_SOCKET_FLAG, buf, strlen (buf), 0);
-
-    return retval != SOCKET_ERROR ? retval : -1;
-  }
-#endif
 }
