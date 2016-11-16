@@ -18,6 +18,10 @@
  * 02110-1301, USA
  */
 
+#ifdef _WIN32
+#include <io.h>
+#endif
+
 #include "fluid_sys.h"
 
 /* SCHED_FIFO priority for high priority timer threads */
@@ -346,6 +350,29 @@ fluid_is_soundfont(const char *filename)
 unsigned int fluid_curtime(void)
 {
   static long initial_seconds = 0;
+#ifdef _WIN32
+  UINT64 time;
+  FILETIME ft;
+
+  if (initial_seconds == 0) {
+	  GetSystemTimeAsFileTime(&ft);
+	  time = ft.dwHighDateTime;
+	  time <<= 32ULL;
+	  time |= ft.dwLowDateTime;
+	  time /= 10000000; // time is 100ns, convert to seconds
+	  time -= 11644473600LL; // Seconds between Windows epoch (1601/01/01) and Unix
+	  initial_seconds = time;
+  }
+
+  GetSystemTimeAsFileTime(&ft);
+  time = ft.dwHighDateTime;
+  time <<= 32ULL;
+  time |= ft.dwLowDateTime;
+  time /= 10000; // time is 100ns, convert to ms
+  time -= 11644473600000LL; // Milliseconds between Windows epoch (1601/01/01) and Unix
+
+  return time - initial_seconds * 1000;
+#else
   struct timespec timeval;
 
   if (initial_seconds == 0) {
@@ -356,6 +383,7 @@ unsigned int fluid_curtime(void)
   clock_gettime(CLOCK_REALTIME, &timeval);
 
   return (unsigned int)((timeval.tv_sec - initial_seconds) * 1000.0 + timeval.tv_nsec / 1000000.0);
+#endif
 }
 
 /**
@@ -365,11 +393,25 @@ unsigned int fluid_curtime(void)
 double
 fluid_utime (void)
 {
+#ifdef _WIN32
+  FILETIME ft;
+  UINT64 time;
+
+  GetSystemTimeAsFileTime(&ft);
+  time = ft.dwHighDateTime;
+  time <<= 32ULL;
+  time |= ft.dwLowDateTime;
+  time /= 10; // time is 100ns, convert to us
+  time -= 11644473600000000ULL; // Microseconds between Windows epoch (1601/01/01) and Unix
+
+  return time / 1000000.0;
+#else
   struct timespec timeval;
 
   clock_gettime(CLOCK_REALTIME, &timeval);
 
   return (timeval.tv_sec * 1000000.0 + timeval.tv_nsec / 1000.0);
+#endif
 }
 
 
@@ -560,7 +602,7 @@ new_fluid_cond (void)
 
 #endif
 
-static void *
+static FLUID_THREAD_RETURN_TYPE
 fluid_thread_high_prio (void *data)
 {
   fluid_thread_info_t *info = data;
@@ -570,7 +612,7 @@ fluid_thread_high_prio (void *data)
   info->func (info->data);
   FLUID_FREE (info);
 
-  return NULL;
+  return FLUID_THREAD_RETURN_VALUE;
 }
 
 /**
@@ -661,7 +703,7 @@ fluid_thread_join(fluid_thread_t* thread)
 }
 
 
-void *
+FLUID_THREAD_RETURN_TYPE
 fluid_timer_run (void *data)
 {
   fluid_timer_t *timer;
@@ -686,7 +728,11 @@ fluid_timer_run (void *data)
        two callbacks bringing in the "absolute" time (count *
        timer->msec) */
     delay = (count * timer->msec) - (fluid_curtime() - start);
+#ifdef _WIN32
+	if (delay > 0) Sleep (delay);
+#else
     if (delay > 0) usleep (delay * 1000);
+#endif
   }
 
   FLUID_LOG (FLUID_DBG, "Timer thread finished");
@@ -694,7 +740,7 @@ fluid_timer_run (void *data)
   if (timer->auto_destroy)
     FLUID_FREE (timer);
 
-  return NULL;
+  return FLUID_THREAD_RETURN_VALUE;
 }
 
 fluid_timer_t*

@@ -245,11 +245,11 @@ typedef HANDLE fluid_rec_mutex_t;
 #define fluid_rec_mutex_unlock(_m)    ReleaseMutex(_m)
 
 /* Dynamically allocated mutex suitable for fluid_cond_t use */
-typedef HANDLE fluid_cond_mutex_t;
-#define fluid_cond_mutex_init(m)      fluid_win32_mutex_init(m)
-#define fluid_cond_mutex_destroy(m)   CloseHandle(*(m))
-#define fluid_cond_mutex_lock(m)      WaitForSingleObject(*(m), INFINITE)
-#define fluid_cond_mutex_unlock(m)    ReleaseMutex(*(m))
+typedef CRITICAL_SECTION fluid_cond_mutex_t;
+#define fluid_cond_mutex_init(_m)      InitializeCriticalSection(_m)
+#define fluid_cond_mutex_destroy(_m)   DeleteCriticalSection(_m)
+#define fluid_cond_mutex_lock(_m)      EnterCriticalSection(_m)
+#define fluid_cond_mutex_unlock(_m)    LeaveCriticalSection(_m)
 
 static FLUID_INLINE fluid_cond_mutex_t *
 new_fluid_cond_mutex (void)
@@ -301,8 +301,11 @@ typedef DWORD fluid_private_t;
 
 /* Threads */
 
+#define FLUID_THREAD_RETURN_TYPE DWORD WINAPI
+#define FLUID_THREAD_RETURN_VALUE 0
+
 typedef HANDLE fluid_thread_t;
-typedef void *(*fluid_thread_func_t)(void* data);
+typedef DWORD (WINAPI *fluid_thread_func_t)(void* data);
 
 #define FLUID_THREAD_ID_NULL            0                      /* A NULL "ID" value */
 #define fluid_thread_id_t               DWORD                  /* Data type for a thread ID */
