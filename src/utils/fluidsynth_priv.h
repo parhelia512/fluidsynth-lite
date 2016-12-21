@@ -147,7 +147,7 @@ typedef double fluid_real_t;
      _type _name[_len]
 #else
 #  define FLUID_DECLARE_VLA(_type, _name, _len) \
-     _type* _name = g_newa(_type, (_len))
+     _type* _name = _alloca(sizeof(_type) * (_len))
 #endif
 
 
