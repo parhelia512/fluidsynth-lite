@@ -209,6 +209,9 @@ typedef pthread_key_t fluid_private_t;
 
 /* Threads */
 
+#define FLUID_THREAD_RETURN_TYPE void *
+#define FLUID_THREAD_RETURN_VALUE NULL
+
 typedef pthread_t fluid_thread_t;
 typedef void *(*fluid_thread_func_t)(void* data);
 
