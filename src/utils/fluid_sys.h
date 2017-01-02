@@ -327,7 +327,7 @@ int fluid_thread_join(fluid_thread_t* thread);
 #if HAVE_STDATOMIC_H && !defined(_WIN32)
 
 // There's no atomic_float in stdatomic.h, so we create our own.
-typedef volatile float atomic_float;
+typedef _Atomic float atomic_float;
 
 #define fluid_atomic_int_inc(_pi) atomic_fetch_add(_pi, 1)
 #define fluid_atomic_int_add(_pi, _val) atomic_fetch_add(_pi, _val)
