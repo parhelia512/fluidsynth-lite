@@ -1,0 +1,14 @@
+sudo: false
+
+language: c
+
+compiler:
+  - gcc
+  - clang
+
+install:
+  - "$CC" --version
+
+script:
+  - cmake .
+  - cmake --build .
