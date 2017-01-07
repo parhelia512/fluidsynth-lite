@@ -1,7 +1,11 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
+﻿# CLion
+/.idea/workspace.xml
+/.idea/tasks.xml
+/cmake-*
 
-/build
+# Visual Studio 2017
 /.vs
 /slnx.VC.db
+
+# Misc.
+/build
