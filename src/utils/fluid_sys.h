@@ -351,18 +351,19 @@ typedef _Atomic float atomic_float;
 #elif _WIN32
 
 typedef volatile LONG atomic_int;
+typedef volatile ULONG atomic_uint;
 typedef volatile float atomic_float;
 
 #define fluid_atomic_int_inc(_pi) InterlockedIncrement(_pi)
 #define fluid_atomic_int_add(_pi, _val) InterlockedAdd(_pi, _val)
-#define fluid_atomic_int_get(_pi) (*_pi)
+#define fluid_atomic_int_get(_pi) (*(LONG*)_pi)
 #define fluid_atomic_int_set(_pi, _val) InterlockedExchange(_pi, _val)
 #define fluid_atomic_int_compare_and_exchange(_pi, _old, _new)  \
     InterlockedCompareExchange(_pi, _old, _new)
 #define fluid_atomic_int_exchange_and_add(_pi, _add)  \
     InterlockedExchangeAdd(_pi, _add)
 
-#define fluid_atomic_pointer_get(_pp)           (_pp)
+#define fluid_atomic_pointer_get(_pp)           ((void*)_pp)
 #define fluid_atomic_pointer_set(_pp, val)      InterlockedExchangePointer(&( _pp ), val)
 #define fluid_atomic_pointer_compare_and_exchange(_pp, _old, _new)  \
     InterlockedCompareExchangePointer(&(_pp), _old, _new)
@@ -380,7 +381,7 @@ fluid_win32_atomic_float_set(atomic_float *pf, float val)
     InterlockedExchange(pi, un.iv);
 }
 
-#define fluid_atomic_float_get(_pf) (*(_pf));
+#define fluid_atomic_float_get(_pf) (*(float*)(_pf));
 #define fluid_atomic_float_set(_pf, _val) fluid_win32_atomic_float_set(_pf, _val)
 
 #else

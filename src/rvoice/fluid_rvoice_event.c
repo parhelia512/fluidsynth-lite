@@ -132,7 +132,7 @@ fluid_rvoice_eventhandler_push(fluid_rvoice_eventhandler_t* handler,
                                 fluid_real_t realparam)
 {
   fluid_rvoice_event_t* event;
-  fluid_rvoice_event_t local_event;
+  fluid_rvoice_event_t local_event = { 0 };
   event = handler->is_threadsafe ? 
     fluid_ringbuffer_get_inptr(handler->queue, handler->queue_stored) : &local_event;
 
@@ -158,7 +158,7 @@ fluid_rvoice_eventhandler_push_ptr(fluid_rvoice_eventhandler_t* handler,
                                    void* method, void* object, void* ptr)
 {
   fluid_rvoice_event_t* event;
-  fluid_rvoice_event_t local_event;
+  fluid_rvoice_event_t local_event = { 0 };
   event = handler->is_threadsafe ? 
     fluid_ringbuffer_get_inptr(handler->queue, handler->queue_stored) : &local_event;
 
@@ -185,7 +185,7 @@ fluid_rvoice_eventhandler_push5(fluid_rvoice_eventhandler_t* handler,
                                 fluid_real_t r3, fluid_real_t r4, fluid_real_t r5)
 {
   fluid_rvoice_event_t* event;
-  fluid_rvoice_event_t local_event;
+  fluid_rvoice_event_t local_event = { 0 };
   event = handler->is_threadsafe ? 
     fluid_ringbuffer_get_inptr(handler->queue, handler->queue_stored) : &local_event;
 

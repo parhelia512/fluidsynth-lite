@@ -54,9 +54,7 @@ option ( enable-profiling "profile the dsp code" off )
 option ( enable-trap-on-fpe "enable SIGFPE trap on Floating Point Exceptions" off )
 option ( enable-fpe-check "enable Floating Point Exception checks and debug messages" off )
 option ( enable-debug "enable debugging (default=no)" off )
-
-# Options enabled by default
-option ( BUILD_SHARED_LIBS "Build a shared object or DLL" on )
+option ( BUILD_SHARED_LIBS "Build a shared object or DLL" off )
 
 # Initialize the library directory name suffix.
 if ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
