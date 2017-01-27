@@ -21,7 +21,7 @@
 
 project ( FluidSynth C )
 cmake_minimum_required ( VERSION 2.6.3 )
-set ( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_admin )
+set ( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_admin )
 
 # FluidSynth package name
 set ( PACKAGE "fluidsynth" )
@@ -142,8 +142,7 @@ if ( WIN32 )
   endif  ( MINGW )
 else ( WIN32 )
 # Check PThreads, but not in Windows
-  find_package ( Pthreads REQUIRED )
-  set ( HAVE_LIBPTHREAD ${PTHREADS_FOUND} )
+  set ( HAVE_LIBPTHREAD on )
   set ( LIBFLUID_LIBS m pthread )
 endif ( WIN32 )
 
@@ -252,15 +251,42 @@ if ( CMAKE_BUILD_TYPE MATCHES "Debug" )
 endif ( CMAKE_BUILD_TYPE MATCHES "Debug" )
 
 # General configuration file
-configure_file ( ${CMAKE_SOURCE_DIR}/src/config.cmake
-                 ${CMAKE_BINARY_DIR}/config.h )
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/config.cmake
+                 ${CMAKE_CURRENT_BINARY_DIR}/config.h )
 add_definitions ( -DHAVE_CONFIG_H )
 
 # Extra configuration file for MS VisualC compiler
 if ( MSVC )
-  configure_file ( ${CMAKE_SOURCE_DIR}/src/config_win32.cmake
-                   ${CMAKE_BINARY_DIR}/config_win32.h )
+  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/config_win32.cmake
+                   ${CMAKE_CURRENT_BINARY_DIR}/config_win32.h )
 endif ( MSVC )
+
+# Add public headers
+set ( public_HEADERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/fluidsynth/audio.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/fluidsynth/event.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/fluidsynth/gen.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/fluidsynth/log.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/fluidsynth/midi.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/fluidsynth/misc.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/fluidsynth/mod.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/fluidsynth/ramsfont.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/fluidsynth/seq.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/fluidsynth/seqbind.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/fluidsynth/settings.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/fluidsynth/sfont.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/fluidsynth/shell.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/fluidsynth/synth.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/fluidsynth/types.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/fluidsynth/voice.h
+    ${CMAKE_CURRENT_BINARY_DIR}/include/fluidsynth/version.h
+)
+
+set ( public_main_HEADER
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/fluidsynth.h
+)
+
+set ( config_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/config.h )
 
 # Process subdirectories
 add_subdirectory ( src )
@@ -271,8 +297,8 @@ include ( report )
 # CPack support
 set ( CPACK_PACKAGE_DESCRIPTION_SUMMARY "FluidSynth real-time synthesizer" )
 set ( CPACK_PACKAGE_VENDOR "fluidsynth.org" )
-set ( CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.md" )
-set ( CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING" )
+set ( CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md" )
+set ( CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING" )
 set ( CPACK_PACKAGE_VERSION_MAJOR ${FLUIDSYNTH_VERSION_MAJOR} )
 set ( CPACK_PACKAGE_VERSION_MINOR ${FLUIDSYNTH_VERSION_MINOR} )
 set ( CPACK_PACKAGE_VERSION_PATCH ${FLUIDSYNTH_VERSION_MICRO} )
