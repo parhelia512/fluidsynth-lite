@@ -324,6 +324,9 @@ int fluid_thread_join(fluid_thread_t* thread);
 
 /* Atomic operations */
 
+#include "fluid_atomic.h"
+
+#if 0
 #if HAVE_STDATOMIC_H && !defined(_WIN32)
 
 // There's no atomic_float in stdatomic.h, so we create our own.
@@ -387,6 +390,7 @@ fluid_win32_atomic_float_set(atomic_float *pf, float val)
 #else
 
 #endif /* HAVE_STDATOMIC_H */
+#endif //0
 
 /* Sockets and I/O */
 

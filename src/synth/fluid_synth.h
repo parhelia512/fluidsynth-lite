@@ -155,23 +155,23 @@ struct _fluid_synth_t
   unsigned int storeid;
   fluid_rvoice_eventhandler_t* eventhandler;
 
-  atomic_float reverb_roomsize;             /**< Shadow of reverb roomsize */
-  atomic_float reverb_damping;              /**< Shadow of reverb damping */
-  atomic_float reverb_width;                /**< Shadow of reverb width */
-  atomic_float reverb_level;                /**< Shadow of reverb level */
+  float reverb_roomsize;             /**< Shadow of reverb roomsize */
+  float reverb_damping;              /**< Shadow of reverb damping */
+  float reverb_width;                /**< Shadow of reverb width */
+  float reverb_level;                /**< Shadow of reverb level */
 
-  atomic_int chorus_nr;                     /**< Shadow of chorus number */
-  atomic_float chorus_level;                /**< Shadow of chorus level */
-  atomic_float chorus_speed;                /**< Shadow of chorus speed */
-  atomic_float chorus_depth;                /**< Shadow of chorus depth */
-  atomic_int chorus_type;            /**< Shadow of chorus type */
+  int chorus_nr;                     /**< Shadow of chorus number */
+  float chorus_level;                /**< Shadow of chorus level */
+  float chorus_speed;                /**< Shadow of chorus speed */
+  float chorus_depth;                /**< Shadow of chorus depth */
+  int chorus_type;            /**< Shadow of chorus type */
 
   int cur;                           /**< the current sample in the audio buffers to be output */
   int curmax;                        /**< current amount of samples present in the audio buffers */
   int dither_index;		     /**< current index in random dither value buffer: fluid_synth_(write_s16|dither_s16) */
 
   char outbuf[256];                  /**< buffer for message output */
-  atomic_float cpu_load;                    /**< CPU load in percent (CPU time required / audio synthesized time * 100) */
+  float cpu_load;                    /**< CPU load in percent (CPU time required / audio synthesized time * 100) */
 
   fluid_tuning_t*** tuning;          
 

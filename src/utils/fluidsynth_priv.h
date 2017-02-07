@@ -56,9 +56,6 @@
 
 #if HAVE_STDATOMIC_H
 #include <stdatomic.h>
-#elif !defined(_WIN32)
-#include "clang_stdatomic.h"
-#define HAVE_STDATOMIC_H 1
 #endif
 
 #if HAVE_THREADS_H

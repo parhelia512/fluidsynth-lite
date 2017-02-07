@@ -48,7 +48,7 @@ fluid_tuning_t* new_fluid_tuning(const char* name, int bank, int prog)
     tuning->pitch[i] = i * 100.0;
   }
 
-  tuning->refcount = 1;         /* Start with a refcount of 1 */
+  fluid_atomic_int_set(&tuning->refcount, 1); /* Start with a refcount of 1 */
 
   return tuning;
 }
@@ -86,7 +86,7 @@ fluid_tuning_duplicate (fluid_tuning_t *tuning)
   for (i = 0; i < 128; i++)
     new_tuning->pitch[i] = tuning->pitch[i];
 
-  new_tuning->refcount = 1;     /* Start with a refcount of 1 */
+  fluid_atomic_int_set(&new_tuning->refcount, 1); /* Start with a refcount of 1 */
 
   return new_tuning;
 }
@@ -117,13 +117,10 @@ fluid_tuning_unref (fluid_tuning_t *tuning, int count)
    * reach 0 when there are no references and therefore no possibility of
    * another thread adding a reference in between */
 
-  // TODO: Make this properly atomic
-  //fluid_atomic_int_add (&tuning->refcount, -count);
-  tuning->refcount -= count;
+  fluid_atomic_int_add (&tuning->refcount, -count);
 
   /* Delete when refcount reaches 0 */
-  //if (!fluid_atomic_int_get (&tuning->refcount))
-  if (!tuning->refcount)
+  if (!fluid_atomic_int_get(&tuning->refcount))
   {
     delete_fluid_tuning (tuning);
     return TRUE;

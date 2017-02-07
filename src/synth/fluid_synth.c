@@ -440,18 +440,12 @@ fluid_synth_init(void)
 
 static FLUID_INLINE unsigned int fluid_synth_get_ticks(fluid_synth_t* synth)
 {
-  if (synth->eventhandler->is_threadsafe)
-    return fluid_atomic_int_get(&synth->ticks_since_start);
-  else
-    return synth->ticks_since_start;
+  return fluid_atomic_int_get(&synth->ticks_since_start);
 }
 
 static FLUID_INLINE void fluid_synth_add_ticks(fluid_synth_t* synth, int val)
 {
-  if (synth->eventhandler->is_threadsafe)
-    fluid_atomic_int_add(&synth->ticks_since_start, val);
-  else
-    synth->ticks_since_start += val;
+  fluid_atomic_int_add(&synth->ticks_since_start, val);
 }
 
 
@@ -659,7 +653,7 @@ new_fluid_synth(fluid_settings_t *settings)
   synth->sfont_info = NULL;
   synth->sfont_hash = new_fluid_hashtable (NULL, NULL);
   synth->noteid = 0;
-  synth->ticks_since_start = 0;
+  fluid_atomic_int_set(&synth->ticks_since_start, 0);
   synth->tuning = NULL;
   fluid_private_init(synth->tuning_iter);
 
@@ -718,8 +712,8 @@ new_fluid_synth(fluid_settings_t *settings)
   fluid_synth_update_overflow(synth, "", 0.0f);
   fluid_synth_update_mixer(synth, fluid_rvoice_mixer_set_polyphony, 
 			   synth->polyphony, 0.0f);
-  fluid_synth_set_reverb_on(synth, synth->with_reverb);
-  fluid_synth_set_chorus_on(synth, synth->with_chorus);
+  fluid_synth_set_reverb_on(synth, fluid_atomic_int_get(&synth->with_reverb));
+  fluid_synth_set_chorus_on(synth, fluid_atomic_int_get(&synth->with_chorus));
 				 
   synth->cur = FLUID_BUFSIZE;
   synth->curmax = 0;
@@ -3845,19 +3839,19 @@ fluid_synth_set_chorus_full(fluid_synth_t* synth, int set, int nr, double level,
   fluid_synth_api_enter(synth);
 
   if (set & FLUID_CHORUS_SET_NR)
-    fluid_atomic_int_set (&synth->chorus_nr, nr);
+    synth->chorus_nr = nr;
 
   if (set & FLUID_CHORUS_SET_LEVEL)
-    fluid_atomic_float_set (&synth->chorus_level, level);
+    synth->chorus_level = level;
 
   if (set & FLUID_CHORUS_SET_SPEED)
-    fluid_atomic_float_set (&synth->chorus_speed, speed);
+    synth->chorus_speed = speed;
 
   if (set & FLUID_CHORUS_SET_DEPTH)
-    fluid_atomic_float_set (&synth->chorus_depth, depth_ms);
+    synth->chorus_depth = depth_ms;
 
   if (set & FLUID_CHORUS_SET_TYPE)
-    fluid_atomic_int_set (&synth->chorus_type, type);
+    synth->chorus_type = type;
   
   fluid_rvoice_eventhandler_push5(synth->eventhandler, 
 				  fluid_rvoice_mixer_set_chorus_params,
@@ -3875,12 +3869,10 @@ fluid_synth_set_chorus_full(fluid_synth_t* synth, int set, int nr, double level,
 int
 fluid_synth_get_chorus_nr(fluid_synth_t* synth)
 {
-  double result;
   fluid_return_val_if_fail (synth != NULL, 0.0);
   fluid_synth_api_enter(synth);
 
-  result = fluid_atomic_int_get (&synth->chorus_nr);
-  FLUID_API_RETURN(result);
+  FLUID_API_RETURN(synth->chorus_nr);
 }
 
 /**
@@ -3939,12 +3931,10 @@ fluid_synth_get_chorus_depth_ms(fluid_synth_t* synth)
 int
 fluid_synth_get_chorus_type(fluid_synth_t* synth)
 {
-  double result;
   fluid_return_val_if_fail (synth != NULL, 0.0);
   fluid_synth_api_enter(synth);
 
-  result = fluid_atomic_int_get (&synth->chorus_type);
-  FLUID_API_RETURN(result);
+  FLUID_API_RETURN(synth->chorus_type);
 }
 
 /*
