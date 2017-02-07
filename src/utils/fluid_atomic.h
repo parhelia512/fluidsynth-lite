@@ -53,7 +53,20 @@ typedef struct { volatile unsigned value; } atomic_uint;
                           "Atomic must be the size of an int");         \
             __sync_bool_compare_and_swap(&(atomic)->value, (oldval), (newval));})
 
-#endif
+#elif defined(_WIN32)
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 
+typedef LONG atomic_int;
+typedef ULONG atomic_uint;
+
+#define fluid_atomic_int_inc(atomic) InterlockedIncrement((atomic))
+#define fluid_atomic_int_add(atomic, val) InterlockedAdd((atomic), (val))
+#define fluid_atomic_int_get(atomic) (*(LONG*)(atomic))
+#define fluid_atomic_int_set(atomic, val) InterlockedExchange((atomic), (val))
+#define fluid_atomic_int_exchange_and_add(atomic, add)  \
+    InterlockedExchangeAdd((atomic), (add))
+
+#endif
 
 #endif /* _FLUID_ATOMIC_H */
