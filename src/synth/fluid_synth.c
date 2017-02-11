@@ -719,17 +719,20 @@ new_fluid_synth(fluid_settings_t *settings)
   synth->curmax = 0;
   synth->dither_index = 0;
 
-  synth->reverb_roomsize = FLUID_REVERB_DEFAULT_ROOMSIZE;
-  synth->reverb_damping = FLUID_REVERB_DEFAULT_DAMP;
-  synth->reverb_width = FLUID_REVERB_DEFAULT_WIDTH;
-  synth->reverb_level = FLUID_REVERB_DEFAULT_LEVEL;
+  fluid_atomic_float_set(&synth->reverb_roomsize, FLUID_REVERB_DEFAULT_ROOMSIZE);
+  fluid_atomic_float_set(&synth->reverb_damping, FLUID_REVERB_DEFAULT_DAMP);
+  fluid_atomic_float_set(&synth->reverb_width, FLUID_REVERB_DEFAULT_WIDTH);
+  fluid_atomic_float_set(&synth->reverb_level, FLUID_REVERB_DEFAULT_LEVEL);
 
-  fluid_rvoice_eventhandler_push5(synth->eventhandler, 
-				  fluid_rvoice_mixer_set_reverb_params,
-				  synth->eventhandler->mixer, 
-				  FLUID_REVMODEL_SET_ALL, synth->reverb_roomsize, 
-				  synth->reverb_damping, synth->reverb_width, 
-				  synth->reverb_level, 0.0f);
+  fluid_rvoice_eventhandler_push5(synth->eventhandler,
+                                  fluid_rvoice_mixer_set_reverb_params,
+                                  synth->eventhandler->mixer,
+                                  FLUID_REVMODEL_SET_ALL,
+                                  fluid_atomic_float_get(&synth->reverb_roomsize),
+                                  fluid_atomic_float_get(&synth->reverb_damping),
+                                  fluid_atomic_float_get(&synth->reverb_width),
+                                  fluid_atomic_float_get(&synth->reverb_level),
+                                  0.0f);
 
   /* Initialize multi-core variables if multiple cores enabled */
   if (synth->cores > 1)
@@ -2501,7 +2504,7 @@ fluid_synth_nwrite_float(fluid_synth_t* synth, int len,
   synth->cur = num;
 
   time = fluid_utime() - time;
-  cpu_load = 0.5 * (synth->cpu_load + time * synth->sample_rate / len / 10000.0);
+  cpu_load = 0.5 * (fluid_atomic_float_get(&synth->cpu_load) + time * synth->sample_rate / len / 10000.0);
   fluid_atomic_float_set (&synth->cpu_load, cpu_load);
 
   if (!synth->eventhandler->is_threadsafe)
@@ -2604,7 +2607,7 @@ fluid_synth_write_float(fluid_synth_t* synth, int len,
   synth->cur = l;
 
   time = fluid_utime() - time;
-  cpu_load = 0.5 * (synth->cpu_load + time * synth->sample_rate / len / 10000.0);
+  cpu_load = 0.5 * (fluid_atomic_float_get(&synth->cpu_load) + time * synth->sample_rate / len / 10000.0);
   fluid_atomic_float_set (&synth->cpu_load, cpu_load);
 
   if (!synth->eventhandler->is_threadsafe)
@@ -2728,7 +2731,7 @@ fluid_synth_write_s16(fluid_synth_t* synth, int len,
   fluid_profile(FLUID_PROF_WRITE, prof_ref);
 
   time = fluid_utime() - time;
-  cpu_load = 0.5 * (synth->cpu_load + time * synth->sample_rate / len / 10000.0);
+  cpu_load = 0.5 * (fluid_atomic_float_get(&synth->cpu_load) + time * synth->sample_rate / len / 10000.0);
   fluid_atomic_float_set (&synth->cpu_load, cpu_load);
 
   if (!synth->eventhandler->is_threadsafe)
@@ -3842,16 +3845,16 @@ fluid_synth_set_chorus_full(fluid_synth_t* synth, int set, int nr, double level,
     synth->chorus_nr = nr;
 
   if (set & FLUID_CHORUS_SET_LEVEL)
-    synth->chorus_level = level;
+    fluid_atomic_float_set(&synth->chorus_level, level);
 
   if (set & FLUID_CHORUS_SET_SPEED)
-    synth->chorus_speed = speed;
+    fluid_atomic_float_set(&synth->chorus_speed, speed);
 
   if (set & FLUID_CHORUS_SET_DEPTH)
-    synth->chorus_depth = depth_ms;
+    fluid_atomic_float_set(&synth->chorus_depth, depth_ms);
 
   if (set & FLUID_CHORUS_SET_TYPE)
-    synth->chorus_type = type;
+    fluid_atomic_int_set(&synth->chorus_type, type);
   
   fluid_rvoice_eventhandler_push5(synth->eventhandler, 
 				  fluid_rvoice_mixer_set_chorus_params,
@@ -3887,7 +3890,7 @@ fluid_synth_get_chorus_level(fluid_synth_t* synth)
   fluid_return_val_if_fail (synth != NULL, 0.0);
   fluid_synth_api_enter(synth);
 
-  result = fluid_atomic_float_get (&synth->chorus_level);
+  result = fluid_atomic_float_get(&synth->chorus_level);
   FLUID_API_RETURN(result);
 }
 
@@ -3903,7 +3906,7 @@ fluid_synth_get_chorus_speed_Hz(fluid_synth_t* synth)
   fluid_return_val_if_fail (synth != NULL, 0.0);
   fluid_synth_api_enter(synth);
 
-  result = fluid_atomic_float_get (&synth->chorus_speed);
+  result = fluid_atomic_float_get(&synth->chorus_speed);
   FLUID_API_RETURN(result);
 }
 
@@ -3934,7 +3937,7 @@ fluid_synth_get_chorus_type(fluid_synth_t* synth)
   fluid_return_val_if_fail (synth != NULL, 0.0);
   fluid_synth_api_enter(synth);
 
-  FLUID_API_RETURN(synth->chorus_type);
+  FLUID_API_RETURN(fluid_atomic_int_get(&synth->chorus_type));
 }
 
 /*
