@@ -76,8 +76,9 @@ typedef struct { volatile float value; } atomic_float;
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-typedef LONG atomic_int;
-typedef ULONG atomic_uint;
+typedef volatile LONG atomic_int;
+typedef volatile ULONG atomic_uint;
+typedef volatile LONG atomic_float;
 
 #define fluid_atomic_int_inc(atomic) InterlockedIncrement((atomic))
 #define fluid_atomic_int_add(atomic, val) InterlockedAdd((atomic), (val))
@@ -85,6 +86,16 @@ typedef ULONG atomic_uint;
 #define fluid_atomic_int_set(atomic, val) InterlockedExchange((atomic), (val))
 #define fluid_atomic_int_exchange_and_add(atomic, add)  \
     InterlockedExchangeAdd((atomic), (add))
+
+#define fluid_atomic_float_get(atomic) (*(FLOAT*)(atomic))
+
+static inline float
+fluid_atomic_float_set(atomic_float *atomic, float val)
+{
+    LONG ival = *(LONG*)&val;
+    LONG rval = InterlockedExchange(atomic, ival);
+    return *(float*)&rval;
+}
 
 #endif
 
