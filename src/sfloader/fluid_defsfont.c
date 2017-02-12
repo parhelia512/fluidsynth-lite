@@ -41,6 +41,8 @@
 #define INT8_FROM_LE(x) x
 #endif
 
+#define FLUID_INT_TO_POINTER(val) ((void*) (((char*) 0) + (val)))
+
 /***************************************************************
  *
  *                           SFONT LOADER

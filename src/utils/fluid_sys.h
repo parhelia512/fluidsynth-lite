@@ -58,7 +58,7 @@ void fluid_time_config(void);
 #define fluid_return_if_fail(expr)          if (!(expr)) return
 #define FLUID_INLINE                        inline
 #define FLUID_POINTER_TO_UINT(x)            ((size_t)(x))
-#define FLUID_POINTER_TO_INT(x)             ((int)(x))
+#define FLUID_POINTER_TO_INT(x)             ((intptr_t)(x))
 #define FLUID_N_ELEMENTS(struct)            (sizeof (struct) / sizeof (struct[0]))
 
 // TODO: Add proper big endianess check
