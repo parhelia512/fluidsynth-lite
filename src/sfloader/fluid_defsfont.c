@@ -1063,7 +1063,7 @@ int fluid_defpreset_import_sfont(fluid_defpreset_t *preset, SFPreset *sfpreset,
     fluid_preset_zone_t *zone;
     int count;
     char zone_name[256];
-    if ((sfpreset->name != NULL) && (FLUID_STRLEN(sfpreset->name) > 0)) {
+    if (FLUID_STRLEN(sfpreset->name) > 0) {
         FLUID_STRCPY(preset->name, sfpreset->name);
     } else {
         FLUID_SPRINTF(preset->name, "Bank%d,Preset%d", sfpreset->bank,
@@ -1465,7 +1465,7 @@ int fluid_inst_import_sfont(fluid_inst_t *inst, SFInst *sfinst,
     int count;
 
     p = sfinst->zone;
-    if ((sfinst->name != NULL) && (FLUID_STRLEN(sfinst->name) > 0)) {
+    if (FLUID_STRLEN(sfinst->name) > 0) {
         FLUID_STRCPY(inst->name, sfinst->name);
     } else {
         FLUID_STRCPY(inst->name, "<untitled>");

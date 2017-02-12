@@ -136,7 +136,6 @@ fluid_pthread_mutex_init(pthread_mutex_t *m, int kind)
 }
 /* Regular mutex */
 typedef pthread_mutex_t fluid_mutex_t;
-#define FLUID_MUTEX_INIT          { 0 }
 #define fluid_mutex_init(_m)      pthread_mutex_init (&(_m), NULL)
 #define fluid_mutex_destroy(_m)   pthread_mutex_destroy(&(_m))
 #define fluid_mutex_lock(_m)      pthread_mutex_lock(&(_m))
