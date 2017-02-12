@@ -26,15 +26,14 @@
 /**
  * Lockless event queue instance.
  */
-struct _fluid_ringbuffer_t
-{
-  char *array;  /**< Queue array of arbitrary size elements */
-  int totalcount;       /**< Total count of elements in array */
-  atomic_int count;     /**< Current count of elements */
-  int in;               /**< Index in queue to store next pushed element */
-  int out;              /**< Index in queue of next popped element */
-  int elementsize;      /**< Size of each element */
-  void* userdata;
+struct _fluid_ringbuffer_t {
+    char *array;  /**< Queue array of arbitrary size elements */
+    int totalcount;       /**< Total count of elements in array */
+    atomic_int count;     /**< Current count of elements */
+    int in;               /**< Index in queue to store next pushed element */
+    int out;              /**< Index in queue of next popped element */
+    int elementsize;      /**< Size of each element */
+    void* userdata;
 };
 
 typedef struct _fluid_ringbuffer_t fluid_ringbuffer_t;
@@ -58,8 +57,8 @@ void delete_fluid_ringbuffer (fluid_ringbuffer_t *queue);
 static FLUID_INLINE void*
 fluid_ringbuffer_get_inptr (fluid_ringbuffer_t *queue, int offset)
 {
-  return fluid_atomic_int_get(&queue->count) + offset >= queue->totalcount ? NULL
-    : queue->array + queue->elementsize * ((queue->in + offset) % queue->totalcount);
+    return fluid_atomic_int_get(&queue->count) + offset >= queue->totalcount ? NULL
+           : queue->array + queue->elementsize * ((queue->in + offset) % queue->totalcount);
 }
 
 /**
@@ -73,11 +72,11 @@ fluid_ringbuffer_get_inptr (fluid_ringbuffer_t *queue, int offset)
 static FLUID_INLINE void
 fluid_ringbuffer_next_inptr (fluid_ringbuffer_t *queue, int count)
 {
-  fluid_atomic_int_add(&queue->count, count);
+    fluid_atomic_int_add(&queue->count, count);
 
-  queue->in += count;
-  if (queue->in >= queue->totalcount)
-    queue->in -= queue->totalcount;
+    queue->in += count;
+    if (queue->in >= queue->totalcount)
+        queue->in -= queue->totalcount;
 }
 
 /**
@@ -88,7 +87,7 @@ fluid_ringbuffer_next_inptr (fluid_ringbuffer_t *queue, int count)
 static FLUID_INLINE int
 fluid_ringbuffer_get_count(fluid_ringbuffer_t *queue)
 {
-  return fluid_atomic_int_get(&queue->count);
+    return fluid_atomic_int_get(&queue->count);
 }
 
 
@@ -104,8 +103,8 @@ fluid_ringbuffer_get_count(fluid_ringbuffer_t *queue)
 static FLUID_INLINE void*
 fluid_ringbuffer_get_outptr (fluid_ringbuffer_t *queue)
 {
-  return fluid_ringbuffer_get_count(queue) == 0 ? NULL
-    : queue->array + queue->elementsize * queue->out;
+    return fluid_ringbuffer_get_count(queue) == 0 ? NULL
+           : queue->array + queue->elementsize * queue->out;
 }
 
 
@@ -119,10 +118,10 @@ fluid_ringbuffer_get_outptr (fluid_ringbuffer_t *queue)
 static FLUID_INLINE void
 fluid_ringbuffer_next_outptr (fluid_ringbuffer_t *queue)
 {
-  fluid_atomic_int_add (&queue->count, -1);
+    fluid_atomic_int_add (&queue->count, -1);
 
-  if (++queue->out == queue->totalcount)
-    queue->out = 0;
+    if (++queue->out == queue->totalcount)
+        queue->out = 0;
 }
 
 #endif /* _FLUID_ringbuffer_H */

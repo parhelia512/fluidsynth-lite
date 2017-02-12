@@ -28,19 +28,19 @@
 /* Private data for event */
 /* ?? should be optimized in size, using unions */
 struct _fluid_event_t {
-	unsigned int time;
-	int type;
-	short src;
-	short dest;
-	int channel;
-	short key;
-	short vel;
-	short control;
-	short value;
-	short id; //?? unused ?
-	int pitch;
-	unsigned int duration;
-	void* data;
+    unsigned int time;
+    int type;
+    short src;
+    short dest;
+    int channel;
+    short key;
+    short vel;
+    short control;
+    short value;
+    short id; //?? unused ?
+    int pitch;
+    unsigned int duration;
+    void* data;
 };
 
 unsigned int fluid_event_get_time(fluid_event_t* evt);
@@ -50,15 +50,15 @@ void fluid_event_clear(fluid_event_t* evt);
 
 /* private data for sorter + heap */
 enum fluid_evt_entry_type {
-  FLUID_EVT_ENTRY_INSERT = 0,
-  FLUID_EVT_ENTRY_REMOVE
+    FLUID_EVT_ENTRY_INSERT = 0,
+    FLUID_EVT_ENTRY_REMOVE
 };
 
 typedef struct _fluid_evt_entry fluid_evt_entry;
 struct _fluid_evt_entry {
-	fluid_evt_entry *next;
-	short entryType;
-	fluid_event_t evt;
+    fluid_evt_entry *next;
+    short entryType;
+    fluid_event_t evt;
 };
 
 #define HEAP_WITH_DYNALLOC 1
@@ -66,12 +66,12 @@ struct _fluid_evt_entry {
 
 typedef struct _fluid_evt_heap_t {
 #ifdef HEAP_WITH_DYNALLOC
-  fluid_evt_entry* freelist;
-  fluid_mutex_t mutex;
+    fluid_evt_entry* freelist;
+    fluid_mutex_t mutex;
 #else
-	fluid_evt_entry* head;
-	fluid_evt_entry* tail;
-	fluid_evt_entry pool;
+    fluid_evt_entry* head;
+    fluid_evt_entry* tail;
+    fluid_evt_entry pool;
 #endif
 } fluid_evt_heap_t;
 

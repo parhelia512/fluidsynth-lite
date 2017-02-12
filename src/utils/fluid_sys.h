@@ -38,7 +38,6 @@
 
 #include "fluidsynth_priv.h"
 
-
 /**
  * Macro used for safely accessing a message from a GError and using a default
  * message if it is NULL.
@@ -58,10 +57,8 @@ void fluid_time_config(void);
 #define fluid_return_val_if_fail(expr, val) if (!(expr)) return (val)
 #define fluid_return_if_fail(expr)          if (!(expr)) return
 #define FLUID_INLINE                        inline
-#define FLUID_POINTER_TO_UINT(x)            ((uint32_t)(x))
-#define FLUID_UINT_TO_POINTER(X)            ((void *)(x))
+#define FLUID_POINTER_TO_UINT(x)            ((size_t)(x))
 #define FLUID_POINTER_TO_INT(x)             ((int)(x))
-#define FLUID_INT_TO_POINTER(x)             ((void *)(x))
 #define FLUID_N_ELEMENTS(struct)            (sizeof (struct) / sizeof (struct[0]))
 
 // TODO: Add proper big endianess check
@@ -84,7 +81,7 @@ extern unsigned int fluid_debug_flags;
 #if DEBUG
 
 enum fluid_debug_level {
-  FLUID_DBG_DRIVER = 1
+    FLUID_DBG_DRIVER = 1
 };
 
 int fluid_debug(int level, char * fmt, ...);
@@ -162,17 +159,17 @@ typedef pthread_mutex_t fluid_cond_mutex_t;
 static FLUID_INLINE fluid_cond_mutex_t *
 new_fluid_cond_mutex (void)
 {
-  fluid_cond_mutex_t *mutex;
-  mutex = malloc(sizeof(fluid_cond_mutex_t));
-  fluid_cond_mutex_init(mutex);
-  return mutex;
+    fluid_cond_mutex_t *mutex;
+    mutex = malloc(sizeof(fluid_cond_mutex_t));
+    fluid_cond_mutex_init(mutex);
+    return mutex;
 }
 
 static FLUID_INLINE void
 delete_fluid_cond_mutex (fluid_cond_mutex_t *m)
 {
-  fluid_cond_mutex_destroy(m);
-  free(m);
+    fluid_cond_mutex_destroy(m);
+    free(m);
 }
 
 /* Thread condition signaling */
@@ -186,17 +183,17 @@ typedef pthread_cond_t fluid_cond_t;
 static FLUID_INLINE fluid_cond_t *
 new_fluid_cond (void)
 {
-  fluid_cond_t *cond;
-  cond = malloc(sizeof(fluid_cond_t));
-  fluid_cond_init(cond);
-  return cond;
+    fluid_cond_t *cond;
+    cond = malloc(sizeof(fluid_cond_t));
+    fluid_cond_init(cond);
+    return cond;
 }
 
 static FLUID_INLINE void
 delete_fluid_cond (fluid_cond_t *cond)
 {
-  fluid_cond_destroy(cond);
-  free(cond);
+    fluid_cond_destroy(cond);
+    free(cond);
 }
 
 /* Thread private data */
@@ -204,8 +201,32 @@ delete_fluid_cond (fluid_cond_t *cond)
 typedef pthread_key_t fluid_private_t;
 #define fluid_private_init(_priv)                  pthread_key_create(&_priv, NULL)
 #define fluid_private_free(_priv)
-#define fluid_private_get(_priv)                   pthread_getspecific(&(_priv))
-#define fluid_private_set(_priv, _data)            pthread_setspecific(&(_priv), _data)
+#define fluid_private_get(_priv)                   pthread_getspecific((_priv))
+#define fluid_private_set(_priv, _data)            pthread_setspecific((_priv), (_data))
+
+static inline int
+fluid_private_get_int(fluid_private_t priv)
+{
+    union {
+        void *p;
+        int i;
+    } un;
+
+    un.p = pthread_getspecific(priv);
+    return un.i;
+}
+
+static inline void
+fluid_private_set_int(fluid_private_t priv, int data)
+{
+    union {
+        void *p;
+        int i;
+    } un;
+
+    un.i = data;
+    pthread_setspecific(priv, un.p);
+}
 
 /* Threads */
 
@@ -257,17 +278,17 @@ typedef CRITICAL_SECTION fluid_cond_mutex_t;
 static FLUID_INLINE fluid_cond_mutex_t *
 new_fluid_cond_mutex (void)
 {
-  fluid_cond_mutex_t *mutex;
-  mutex = malloc(sizeof(fluid_cond_mutex_t));
-  fluid_cond_mutex_init(mutex);
-  return mutex;
+    fluid_cond_mutex_t *mutex;
+    mutex = malloc(sizeof(fluid_cond_mutex_t));
+    fluid_cond_mutex_init(mutex);
+    return mutex;
 }
 
 static FLUID_INLINE void
 delete_fluid_cond_mutex (fluid_cond_mutex_t *m)
 {
-  fluid_cond_mutex_destroy(m);
-  free(m);
+    fluid_cond_mutex_destroy(m);
+    free(m);
 }
 
 /* Thread condition signaling */
@@ -281,17 +302,17 @@ typedef CONDITION_VARIABLE fluid_cond_t;
 static FLUID_INLINE fluid_cond_t *
 new_fluid_cond (void)
 {
-  fluid_cond_t *cond;
-  cond = malloc(sizeof(fluid_cond_t));
-  fluid_cond_init(cond);
-  return cond;
+    fluid_cond_t *cond;
+    cond = malloc(sizeof(fluid_cond_t));
+    fluid_cond_init(cond);
+    return cond;
 }
 
 static FLUID_INLINE void
 delete_fluid_cond (fluid_cond_t *cond)
 {
-  fluid_cond_destroy(cond);
-  free(cond);
+    fluid_cond_destroy(cond);
+    free(cond);
 }
 
 /* Thread private data */
@@ -344,16 +365,16 @@ int fluid_ostream_printf (fluid_ostream_t out, char* format, ...);
  * fluid_sys.c
  */
 enum {
-  FLUID_PROF_WRITE,
-  FLUID_PROF_ONE_BLOCK,
-  FLUID_PROF_ONE_BLOCK_CLEAR,
-  FLUID_PROF_ONE_BLOCK_VOICE,
-  FLUID_PROF_ONE_BLOCK_VOICES,
-  FLUID_PROF_ONE_BLOCK_REVERB,
-  FLUID_PROF_ONE_BLOCK_CHORUS,
-  FLUID_PROF_VOICE_NOTE,
-  FLUID_PROF_VOICE_RELEASE,
-  FLUID_PROF_LAST
+    FLUID_PROF_WRITE,
+    FLUID_PROF_ONE_BLOCK,
+    FLUID_PROF_ONE_BLOCK_CLEAR,
+    FLUID_PROF_ONE_BLOCK_VOICE,
+    FLUID_PROF_ONE_BLOCK_VOICES,
+    FLUID_PROF_ONE_BLOCK_REVERB,
+    FLUID_PROF_ONE_BLOCK_CHORUS,
+    FLUID_PROF_VOICE_NOTE,
+    FLUID_PROF_VOICE_RELEASE,
+    FLUID_PROF_LAST
 };
 
 
@@ -365,10 +386,10 @@ void fluid_profiling_print(void);
 /** Profiling data. Keep track of min/avg/max values to execute a
     piece of code. */
 typedef struct _fluid_profile_data_t {
-  int num;
-  char* description;
-  double min, max, total;
-  unsigned int count;
+    int num;
+    char* description;
+    double min, max, total;
+    unsigned int count;
 } fluid_profile_data_t;
 
 extern fluid_profile_data_t fluid_profile_data[];

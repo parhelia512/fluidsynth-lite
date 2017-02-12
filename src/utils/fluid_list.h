@@ -35,10 +35,9 @@ typedef struct _fluid_list_t fluid_list_t;
 
 typedef int (*fluid_compare_func_t)(void* a, void* b);
 
-struct _fluid_list_t
-{
-  void* data;
-  fluid_list_t *next;
+struct _fluid_list_t {
+    void* data;
+    fluid_list_t *next;
 };
 
 fluid_list_t* new_fluid_list(void);

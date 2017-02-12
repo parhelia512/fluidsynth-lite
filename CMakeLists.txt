@@ -26,6 +26,10 @@ set ( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_admin )
 # FluidSynth package name
 set ( PACKAGE "fluidsynth" )
 
+if ( NOT MSVC )
+  add_definitions ( -Wall -Werror -std=gnu11 )
+endif ()
+
 # FluidSynth package version
 set ( FLUIDSYNTH_VERSION_MAJOR 1 )
 set ( FLUIDSYNTH_VERSION_MINOR 1 )

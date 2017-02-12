@@ -34,32 +34,30 @@ extern "C" {
 #endif
 
 
-  /*
- * fluid_ramsfont_t
- */
-struct _fluid_ramsfont_t
-{
-  char name[21];                        /* the name of the soundfont */
-  fluid_list_t* sample;    /* the samples in this soundfont */
-  fluid_rampreset_t* preset;    /* the presets of this soundfont */
+/*
+* fluid_ramsfont_t
+*/
+struct _fluid_ramsfont_t {
+    char name[21];                        /* the name of the soundfont */
+    fluid_list_t* sample;    /* the samples in this soundfont */
+    fluid_rampreset_t* preset;    /* the presets of this soundfont */
 
-  fluid_preset_t iter_preset;        /* preset interface used in the iteration */
-  fluid_rampreset_t* iter_cur;       /* the current preset in the iteration */
+    fluid_preset_t iter_preset;        /* preset interface used in the iteration */
+    fluid_rampreset_t* iter_cur;       /* the current preset in the iteration */
 };
 
 /*
  * fluid_preset_t
  */
-struct _fluid_rampreset_t
-{
-  fluid_rampreset_t* next;
-  fluid_ramsfont_t* sfont;                  /* the soundfont this preset belongs to */
-  char name[21];                        /* the name of the preset */
-  unsigned int bank;                    /* the bank number */
-  unsigned int num;                     /* the preset number */
-  fluid_preset_zone_t* global_zone;        /* the global zone of the preset */
-  fluid_preset_zone_t* zone;               /* the chained list of preset zones */
-  fluid_list_t *presetvoices;									/* chained list of used voices */
+struct _fluid_rampreset_t {
+    fluid_rampreset_t* next;
+    fluid_ramsfont_t* sfont;                  /* the soundfont this preset belongs to */
+    char name[21];                        /* the name of the preset */
+    unsigned int bank;                    /* the bank number */
+    unsigned int num;                     /* the preset number */
+    fluid_preset_zone_t* global_zone;        /* the global zone of the preset */
+    fluid_preset_zone_t* zone;               /* the chained list of preset zones */
+    fluid_list_t *presetvoices;									/* chained list of used voices */
 };
 
 
