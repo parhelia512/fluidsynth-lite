@@ -12,21 +12,7 @@
 #endif
 #endif //STATIC_ASSERT
 
-#if (__STDC_VERSION__ >= 201112L) && !defined(__STDC_NO_ATOMICS__) && __has_include(<stdatomic.h>)
-#include <stdatomic.h>
-
-typedef _Atomic(float) atomic_float;
-
-#define fluid_atomic_int_add(atomic, val) atomic_fetch_add((atomic), (val))
-#define fluid_atomic_int_get(atomic) atomic_load((atomic))
-#define fluid_atomic_int_set(atomic, val) atomic_store((atomic), (val))
-#define fluid_atomic_int_inc(atomic) atomic_fetch_add((atomic), 1)
-#define fluid_atomic_int_compare_and_exchange(atomic, oldval, newval) \
-    atomic_compare_exchange_strong((atomic), (oldval), (newval))
-#define fluid_atomic_float_get(atomic) atomic_load((atomic))
-#define fluid_atomic_float_set(atomic, val) atomic_store((atomic), (val))
-
-#elif defined(__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4)
+#ifdef __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4
 
 typedef struct {
     volatile int value;

@@ -27,7 +27,7 @@ set ( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_admin )
 set ( PACKAGE "fluidsynth" )
 
 if ( NOT MSVC )
-  add_definitions ( -Wall -Werror -std=gnu11 )
+  add_definitions ( -Wall -Werror -pedantic -std=gnu11 )
 endif ()
 
 # FluidSynth package version
@@ -81,7 +81,6 @@ check_include_file ( stdlib.h HAVE_STDLIB_H )
 check_include_file ( stdio.h HAVE_STDIO_H )
 check_include_file ( stdint.h HAVE_STDINT_H )
 check_include_file ( stdbool.h HAVE_STDBOOL_H )
-check_include_file ( threads.h HAVE_THREADS_H )
 check_include_file ( math.h HAVE_MATH_H )
 check_include_file ( errno.h HAVE_ERRNO_H )
 check_include_file ( stdarg.h HAVE_STDARG_H )
@@ -95,7 +94,6 @@ check_include_file ( sys/ioctl.h HAVE_SYS_IOCTL_H )
 check_include_file ( fcntl.h HAVE_FCNTL_H )
 
 if ( NOT WIN32 )
-  check_include_file ( stdatomic.h HAVE_STDATOMIC_H )
   check_include_file ( pthread.h HAVE_PTHREAD_H )
 endif ()
 

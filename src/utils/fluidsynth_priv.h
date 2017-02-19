@@ -54,15 +54,7 @@
 #include <stdbool.h>
 #endif
 
-#if HAVE_STDATOMIC_H
-#include <stdatomic.h>
-#endif
-
-#if HAVE_THREADS_H
-#include <threads.h>
-#endif
-
-#if !defined(HAVE_THREADS_H) && defined(HAVE_PTHREAD_H)
+#if HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
 
