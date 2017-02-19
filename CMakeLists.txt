@@ -27,7 +27,7 @@ set ( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_admin )
 set ( PACKAGE "fluidsynth" )
 
 if ( NOT MSVC )
-  add_definitions ( -Wall -Werror -pedantic -std=gnu11 )
+  add_definitions ( -Wall -Werror -std=gnu11 )
 endif ()
 
 # FluidSynth package version
