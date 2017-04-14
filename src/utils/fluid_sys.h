@@ -203,30 +203,6 @@ typedef pthread_key_t fluid_private_t;
 #define fluid_private_get(_priv)                   pthread_getspecific((_priv))
 #define fluid_private_set(_priv, _data)            pthread_setspecific((_priv), (_data))
 
-static inline int
-fluid_private_get_int(fluid_private_t priv)
-{
-    union {
-        void *p;
-        int i;
-    } un;
-
-    un.p = pthread_getspecific(priv);
-    return un.i;
-}
-
-static inline void
-fluid_private_set_int(fluid_private_t priv, int data)
-{
-    union {
-        void *p;
-        int i;
-    } un;
-
-    un.i = data;
-    pthread_setspecific(priv, un.p);
-}
-
 /* Threads */
 
 #define FLUID_THREAD_RETURN_TYPE void *
@@ -341,6 +317,30 @@ void fluid_thread_self_set_prio (int prio_level);
 int fluid_thread_join(fluid_thread_t* thread);
 
 #endif /* HAVE_PTHREAD_H */
+
+static inline int
+fluid_private_get_int(fluid_private_t priv)
+{
+    union {
+        void *p;
+        int i;
+    } un;
+
+    un.p = fluid_private_get(priv);
+    return un.i;
+}
+
+static inline void
+fluid_private_set_int(fluid_private_t priv, int data)
+{
+    union {
+        void *p;
+        int i;
+    } un;
+
+    un.i = data;
+    fluid_private_set(priv, un.p);
+}
 
 /* Atomic operations */
 
